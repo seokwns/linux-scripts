@@ -14,7 +14,8 @@ function show_server_list() {
     printf "%-3s %-20s %-15s %s\n" "No" "Server Name" "IP" "Username"
     printf "%-3s %-20s %-15s %s\n" "---" "--------------------" "---------------" "--------"
 
-    if [ ! -e "$FOLDER_PATH"/*.yaml ]; then
+    if [ -z "$(ls -A $FOLDER_PATH/*.yaml)" ]; then
+        echo "서버가 없습니다."
         exit 0
     fi
 
@@ -23,11 +24,6 @@ function show_server_list() {
     YAML_FILEIP=()
     YAML_FILEUSERNAME=()
 
-    if [ ${#YAML_FILES[@]} -eq 0 ]; then
-        echo "서버가 없습니다."
-        exit 0
-    fi
-    
     for file_path in "${YAML_FILES[@]}"; do
         filename=$(basename "$file_path")
         YAML_FILENAMES+=("${filename%.*}")
