@@ -11,10 +11,23 @@ read_yaml() {
 FOLDER_PATH="/Users/seokjun/Documents/server"
 
 function show_server_list() {
+    printf "%-3s %-20s %-15s %s\n" "No" "Server Name" "IP" "Username"
+    printf "%-3s %-20s %-15s %s\n" "---" "--------------------" "---------------" "--------"
+
+    if [ ! -e "$FOLDER_PATH"/*.yaml ]; then
+        exit 0
+    fi
+
     YAML_FILES=("$FOLDER_PATH"/*.yaml)
     YAML_FILENAMES=()
     YAML_FILEIP=()
     YAML_FILEUSERNAME=()
+
+    if [ ${#YAML_FILES[@]} -eq 0 ]; then
+        echo "서버가 없습니다."
+        exit 0
+    fi
+    
     for file_path in "${YAML_FILES[@]}"; do
         filename=$(basename "$file_path")
         YAML_FILENAMES+=("${filename%.*}")
@@ -27,9 +40,6 @@ function show_server_list() {
     max_filename_length=$(printf "%s\n" "${YAML_FILENAMES[@]}" | awk '{ print length }' | sort -rn | head -n1)
     max_ip_length=$(printf "%s\n" "${YAML_FILEIP[@]}" | awk '{ print length }' | sort -rn | head -n1)
     max_username_length=$(printf "%s\n" "${YAML_FILEUSERNAME[@]}" | awk '{ print length }' | sort -rn | head -n1)
-
-    printf "%-3s %-20s %-15s %s\n" "No" "Server Name" "IP" "Username"
-    printf "%-3s %-20s %-15s %s\n" "---" "--------------------" "---------------" "--------"
 
     for i in "${!YAML_FILENAMES[@]}"; do
         printf "%-3s %-20s %-15s %s\n" "$(($i+1))" "${YAML_FILENAMES[$i]}" "${YAML_FILEIP[$i]}" "${YAML_FILEUSERNAME[$i]}"
