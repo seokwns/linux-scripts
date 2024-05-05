@@ -73,16 +73,8 @@ if [ "$1" == "add" ]; then
 fi
 
 if [ "$1" == "delete" ]; then
-    YAML_FILES=("$FOLDER_PATH"/*.yaml)
-    YAML_FILENAMES=()
-    for file_path in "${YAML_FILES[@]}"; do
-        filename=$(basename "$file_path")
-        YAML_FILENAMES+=("${filename%.*}")
-    done
-
-    for i in "${!YAML_FILENAMES[@]}"; do
-        echo "$(($i+1))) ${YAML_FILENAMES[$i]}"
-    done
+    
+    show_server_list
 
     read -p ">> " selection_index
 
