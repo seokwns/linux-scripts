@@ -10,6 +10,31 @@ read_yaml() {
 
 FOLDER_PATH="/Users/seokjun/Documents/server"
 
+function show_server_list() {
+    YAML_FILES=("$FOLDER_PATH"/*.yaml)
+    YAML_FILENAMES=()
+    YAML_FILEIP=()
+    YAML_FILEUSERNAME=()
+    for file_path in "${YAML_FILES[@]}"; do
+        filename=$(basename "$file_path")
+        YAML_FILENAMES+=("${filename%.*}")
+        IP=$(read_yaml "$file_path" "IP")
+        YAML_FILEIP+=("$IP")
+        USERNAME=$(read_yaml "$file_path" "USERNAME")
+        YAML_FILEUSERNAME+=("$USERNAME")
+    done
+
+    max_filename_length=$(printf "%s\n" "${YAML_FILENAMES[@]}" | awk '{ print length }' | sort -rn | head -n1)
+    max_ip_length=$(printf "%s\n" "${YAML_FILEIP[@]}" | awk '{ print length }' | sort -rn | head -n1)
+    max_username_length=$(printf "%s\n" "${YAML_FILEUSERNAME[@]}" | awk '{ print length }' | sort -rn | head -n1)
+
+    printf "%-3s %-20s %-15s %s\n" "No" "Server Name" "IP" "Username"
+    printf "%-3s %-20s %-15s %s\n" "---" "--------------------" "---------------" "--------"
+
+    for i in "${!YAML_FILENAMES[@]}"; do
+        printf "%-3s %-20s %-15s %s\n" "$(($i+1))" "${YAML_FILENAMES[$i]}" "${YAML_FILEIP[$i]}" "${YAML_FILEUSERNAME[$i]}"
+    done
+}
 
 if [ $# -eq 0 ]; then
     echo "사용법: $0 [파일명]"
@@ -17,7 +42,7 @@ if [ $# -eq 0 ]; then
 fi
 
 if [ "$1" == "list" ]; then
-    find "$FOLDER_PATH" -name "*.yaml" -type f -exec basename {} .yaml \;
+    show_server_list
     exit 0
 fi
 
@@ -82,16 +107,7 @@ fi
 
 if [ "$1" == "connect" ]; then
 
-    YAML_FILES=("$FOLDER_PATH"/*.yaml)
-    YAML_FILENAMES=()
-    for file_path in "${YAML_FILES[@]}"; do
-        filename=$(basename "$file_path")
-        YAML_FILENAMES+=("${filename%.*}")
-    done
-
-    for i in "${!YAML_FILENAMES[@]}"; do
-        echo "$(($i+1))) ${YAML_FILENAMES[$i]}"
-    done
+    show_server_list
 
     read -p ">> " selection_index
 
