@@ -3,12 +3,11 @@
 read_yaml() {
     local yaml_file="$1"
     local value="$2"
-    local result=$(python3 -c "import yaml; print(yaml.safe_load(open('$yaml_file'))['$value'])")
+    local result=$(yq eval ".${value}" "$yaml_file") # yq 사용
     echo "$result"
 }
 
-
-FOLDER_PATH="/Users/seokjun/Documents/server"
+FOLDER_PATH="/Users/seokwns/Documents/server"
 
 function show_server_list() {
     printf "%-3s %-20s %-15s %s\n" "No" "Server Name" "IP" "Username"
@@ -93,21 +92,25 @@ if [ "$1" == "delete" ]; then
         exit 1
     fi
 
-    if [ ! -f "$YAML_FILE" ]; then
-        echo "서버 '$NAME'을(를) 찾을 수 없습니다."
-        exit 1
-    fi
-
     rm "$YAML_FILE"
     echo "'$FILE_NAME' 서버가 삭제되었습니다."
     exit 0
 fi
 
 if [ "$1" == "connect" ]; then
+    YAML_FILES=("$FOLDER_PATH"/*.yaml)
+    YAML_FILENAMES=()
+    for file_path in "${YAML_FILES[@]}"; do
+        filename=$(basename "$file_path")
+        YAML_FILENAMES+=("${filename%.*}")
+    done
 
-    show_server_list
-
-    read -p ">> " selection_index
+    if [ -z "$2" ]; then
+        show_server_list
+        read -p "서버를 선택하세요 (번호): " selection_index
+    else
+        selection_index="$2"
+    fi
 
     selected_index=$(($selection_index - 1))
     FILE_NAME="${YAML_FILENAMES[$selected_index]}"
@@ -131,4 +134,3 @@ if [ "$1" == "connect" ]; then
     interact"
     exit 0
 fi
-
