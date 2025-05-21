@@ -1,0 +1,30 @@
+#!/bin/bash
+
+CONTAINER_NAME="my-gpt"
+IMAGE_NAME="ghcr.io/open-webui/open-webui:main"
+HOST_PORT=8080
+CONTAINER_PORT=8080
+VOLUME_NAME="open-webui"
+
+echo "===> '$CONTAINER_NAME' 컨테이너가 실행 중인지 확인"
+if [ "$(docker ps -q -f name=$CONTAINER_NAME)" ]; then
+    echo "컨테이너 중지 중..."
+    docker stop $CONTAINER_NAME
+fi
+
+echo "컨테이너 삭제 중..."
+docker rm $CONTAINER_NAME 2>/dev/null || true
+
+echo "최신 이미지 pull 중..."
+docker pull $IMAGE_NAME
+
+echo "컨테이너 다시 실행 중..."
+docker run -d \
+    -p $HOST_PORT:$CONTAINER_PORT \
+    --add-host=host.docker.internal:host-gateway \
+    -v $VOLUME_NAME:/app/backend/data \
+    --name $CONTAINER_NAME \
+    --restart always \
+    $IMAGE_NAME
+
+echo "작업 완료: $CONTAINER_NAME 컨테이너가 포트 $HOST_PORT 로 실행 중입니다."
